@@ -1,12 +1,10 @@
 name: Build Android APK
-
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:  # 允许手动触发
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -14,44 +12,55 @@ jobs:
     steps:
     - name: Checkout source
       uses: actions/checkout@v4
-
-    - name: Set up JDK 17
+    - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
+        java-version: '21'
         distribution: 'temurin'
-
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '22'
         cache: 'npm'
-
     - name: Set up Android SDK
       uses: android-actions/setup-android@v3
       with:
         packages: |
-          platforms;android-36
-          build-tools;36.0.0
-          ndk;25.2.9519653
           cmake;3.22.1
-
     - name: Install npm dependencies
-      run: npm ci
-
+      run: npm install
     - name: Build Web resources
       run: npm run build
-
+    - name: Prepare uWebSockets
+      run: |
+        cd android/app/src/main/cpp/third_party
+        rm -rf uSockets
+        git clone --depth 1 --branch v20.44.0 https://github.com/uNetworking/uWebSockets.git
+        cd uWebSockets
+        git submodule update --init --recursive
+        cp -r uSockets ../uSockets
+        cd ../../../../..
+    - name: Create qrcode files
+      run: |
+        touch qrcode.jpg
+        mkdir -p scripts
+        touch scripts/generate_qrcode_header.py
+        cat > android/app/src/main/cpp/src/qrcode_embedded.h << 'EOF'
+        #pragma once
+        const int qrcode_jpg_len = 0;
+        const unsigned char qrcode_jpg[] = {};
+        EOF
+    - name: Fix curl CMakeLists
+      run: |
+        sed -i 's/add_subdirectory(docs)/# add_subdirectory(docs)/g' android/app/src/main/cpp/third_party/curl/CMakeLists.txt
     - name: Sync Capacitor
       run: npx cap sync android
-
     - name: Build Debug APK
       working-directory: android
       run: ./gradlew assembleDebug --no-daemon
-
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: MikuPlayReburn-Debug-APK
+        name: MikuPlay-APK
         path: android/app/build/outputs/apk/debug/app-debug.apk
         retention-days: 30
