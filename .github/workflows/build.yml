@@ -59,6 +59,12 @@ jobs:
         mkdir -p android/app/src/main/cpp/third_party/libvpx/build-android-arm64/lib
         touch android/app/src/main/cpp/third_party/libvpx/build-android-arm64/lib/libvpx.a
         touch android/app/src/main/cpp/third_party/libvpx/build-android-arm64/lib/libvpx_g.a
+        
+    - name: Create cordova variables
+      run: |
+        mkdir -p android/capacitor-cordova-android-plugins
+        touch android/capacitor-cordova-android-plugins/cordova.variables.gradle
+
 
       
     - name: Build Debug APK
