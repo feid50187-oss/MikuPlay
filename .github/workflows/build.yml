@@ -63,9 +63,8 @@ jobs:
         
     - name: Fix capacitor cordova plugins
       run: |
-        sed -i 's/include ":capacitor-cordova-android-plugins"//g' android/settings.gradle
-        sed -i 's/apply from: "../capacitor-cordova-android-plugins\/cordova.variables.gradle"//g' android/app/capacitor.build.gradle
-
+        sed -i 's#include ":capacitor-cordova-android-plugins"##g' android/settings.gradle
+        sed -i 's#apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"##g' android/app/capacitor.build.gradle
 
       
     - name: Build Debug APK
