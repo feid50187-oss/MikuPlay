@@ -61,11 +61,21 @@ jobs:
         touch android/app/src/main/cpp/third_party/libvpx/build-android-arm64/lib/libvpx.a
         touch android/app/src/main/cpp/third_party/libvpx/build-android-arm64/lib/libvpx_g.a
         
-    - name: Fix capacitor cordova plugins
+    - name: Create empty capacitor-cordova plugin
       run: |
-        sed -i 's#include ":capacitor-cordova-android-plugins"##g' android/settings.gradle
-        sed -i 's#apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"##g' android/app/capacitor.build.gradle
-
+        mkdir -p android/capacitor-cordova-android-plugins/src/main
+        cat > android/capacitor-cordova-android-plugins/build.gradle << 'EOF'
+        apply plugin: 'com.android.library'
+        android {
+            namespace 'com.getcapacitor.cordova'
+            compileSdk 35
+            defaultConfig {
+                minSdkVersion 24
+                targetSdkVersion 35
+            }
+        }
+        EOF
+        echo "" > android/capacitor-cordova-android-plugins/cordova.variables.gradle
       
     - name: Build Debug APK
       working-directory: android
