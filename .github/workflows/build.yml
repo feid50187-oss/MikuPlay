@@ -55,9 +55,13 @@ jobs:
         sed -i 's/add_subdirectory(docs)/# add_subdirectory(docs)/g' android/app/src/main/cpp/third_party/curl/CMakeLists.txt
     - name: Sync Capacitor
       run: npx cap sync android
+      
     - name: Build Debug APK
       working-directory: android
-      run: ./gradlew assembleDebug --no-daemon
+      run: |
+        chmod +x gradlew
+        ./gradlew assembleDebug --no-daemon
+        
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
