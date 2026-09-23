@@ -54,16 +54,17 @@ jobs:
     - name: Fix curl CMakeLists
       run: |
         sed -i 's/add_subdirectory(docs)/# add_subdirectory(docs)/g' android/app/src/main/cpp/third_party/curl/CMakeLists.txt
+  
     - name: Fake libvpx library
       run: |
         mkdir -p android/app/src/main/cpp/third_party/libvpx/build-android-arm64/lib
         touch android/app/src/main/cpp/third_party/libvpx/build-android-arm64/lib/libvpx.a
         touch android/app/src/main/cpp/third_party/libvpx/build-android-arm64/lib/libvpx_g.a
         
-    - name: Create cordova variables
+    - name: Fix capacitor cordova plugins
       run: |
-        mkdir -p android/capacitor-cordova-android-plugins
-        touch android/capacitor-cordova-android-plugins/cordova.variables.gradle
+        sed -i 's/include ":capacitor-cordova-android-plugins"//g' android/settings.gradle
+        sed -i 's/apply from: "../capacitor-cordova-android-plugins\/cordova.variables.gradle"//g' android/app/capacitor.build.gradle
 
 
       
