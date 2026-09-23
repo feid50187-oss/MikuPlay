@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+    ═══════════════════════════════════════════════════════════════════════════
+    SO / DEX 完整性校验 — 预期 SHA-256 哈希（XOR 混淆存储）
+
+    这些值由构建后的脚本 generate-so-hash.js / generate-dex-hash.js 自动更新。
+    Resources 不是 SO 或 DEX 的一部分 → 修改它们不需要重编译 → 无循环依赖。
+
+    使用方式（Release 构建）：
+      1. npm run build && cd android && ./gradlew assembleRelease
+      2. node scripts/generate-so-hash.js <so路径>     # 更新下方 SO 哈希
+      3. node scripts/generate-dex-hash.js <apk路径>    # 更新下方 DEX 哈希
+      4. 重新打包 APK（无需重新编译）
+
+    格式：4 个逗号分隔的 uint64 十六进制值（无 0x 前缀，小写）
+    示例：a1b2c3d4e5f6a7b8,c9d0e1f2a3b4c5d6,e7f8a9b0c1d2e3f4,a5b6c7d8e9f0a1b2
+    ═══════════════════════════════════════════════════════════════════════════
+    -->
+
+    <!-- SO 完整性校验 — 更新于 2026-06-21 -->
+    <string name="so_integrity_parts" translatable="false">b5b6113850a926df,6f2a0f55c0d3a749,1bf929db486be524,54817b09594f3f90</string>
+    <string name="so_integrity_keys"  translatable="false">38df176150ba5ed3,f32a0e842a83d69e,f1625ef4bc3e540c,cd1e886a5d055949</string>
+
+    <!-- DEX 完整性校验 — 更新于 2026-06-21 -->
+    <string name="dex_integrity_parts" translatable="false">afc8f372563b9e3f,d6ff7e0b4ac199b4,c1dbe118b2628a31,05bd535fad931ec2</string>
+    <string name="dex_integrity_keys"  translatable="false">031a569b24655667,19427695c3296064,169f2429a6472990,3a12b3b2b2e8a3d4</string>
+</resources>

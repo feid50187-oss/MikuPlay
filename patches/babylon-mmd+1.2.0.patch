@@ -1,0 +1,1321 @@
+diff --git a/node_modules/babylon-mmd/esm/Loader/Shaders/mmdStandard.js b/node_modules/babylon-mmd/esm/Loader/Shaders/mmdStandard.js
+index d7bf486..5775261 100644
+--- a/node_modules/babylon-mmd/esm/Loader/Shaders/mmdStandard.js
++++ b/node_modules/babylon-mmd/esm/Loader/Shaders/mmdStandard.js
+@@ -38,7 +38,7 @@ finalWorld=(finalWorld*influence);
+             codes[`!${EscapeRegExp("struct lightingInfo\n{")}`] = /* glsl */ "\nstruct lightingInfo {\n#ifdef TOON_TEXTURE\n#ifndef NDOTL\nfloat ndl;\n#endif\nfloat isToon;\n#endif\n";
+             // ndl might be clamped to 1.0
+             codes[`!${EscapeRegExp("result.diffuse=ndl*diffuseColor*attenuation;")}`] = /* glsl */ "\n#ifdef TOON_TEXTURE\nresult.diffuse=diffuseColor*attenuation;result.ndl=ndl;result.isToon=1.0;\n#elif defined(IGNORE_DIFFUSE_WHEN_TOON_TEXTURE_DISABLED) \nresult.diffuse=diffuseColor*attenuation;\n#else\nresult.diffuse=(ndl*diffuseColor*attenuation);\n#endif\n";
+-            codes[`!${EscapeRegExp("diffuseBase+=info.diffuse*shadow;")}`] = /* glsl */ "\n#ifdef TOON_TEXTURE\ntoonNdl=vec3(clamp(info.ndl*shadow,0.02,0.98));toonNdl.r=texture2D(toonSampler,vec2(0.5,toonNdl.r)).r;toonNdl.g=texture2D(toonSampler,vec2(0.5,toonNdl.g)).g;toonNdl.b=texture2D(toonSampler,vec2(0.5,toonNdl.b)).b;\n#ifdef TOON_TEXTURE_COLOR\ntoonNdl=mix(\nvec3(1.0),\ntoonNdl*toonTextureMultiplicativeColor.rgb,\ntoonTextureMultiplicativeColor.a\n);toonNdl=clamp(\ntoonNdl+(toonNdl-vec3(1.0))*toonTextureAdditiveColor.a,\n0.0,\n1.0\n)+toonTextureAdditiveColor.rgb;\n#endif\ndiffuseBase+=mix(info.diffuse*shadow,toonNdl*info.diffuse,info.isToon);\n#elif defined(IGNORE_DIFFUSE_WHEN_TOON_TEXTURE_DISABLED)\ndiffuseBase+=info.diffuse;\n#else\ndiffuseBase+=(info.diffuse*shadow);\n#endif\n";
++            codes[`!${EscapeRegExp("diffuseBase+=info.diffuse*shadow;")}`] = /* glsl */ "\n#ifdef TOON_TEXTURE\n#ifdef TOON_SHADOW\ntoonNdl=vec3(clamp(mix(toonShadowParams.x,1.0-toonShadowParams.x,shadow),toonShadowParams.y,1.0-toonShadowParams.y));\n#else\ntoonNdl=vec3(clamp(info.ndl*shadow,0.02,0.98));\n#endif\ntoonNdl.r=texture2D(toonSampler,vec2(0.5,toonNdl.r)).r;toonNdl.g=texture2D(toonSampler,vec2(0.5,toonNdl.g)).g;toonNdl.b=texture2D(toonSampler,vec2(0.5,toonNdl.b)).b;\n#ifdef TOON_TEXTURE_COLOR\ntoonNdl=mix(\nvec3(1.0),\ntoonNdl*toonTextureMultiplicativeColor.rgb,\ntoonTextureMultiplicativeColor.a\n);toonNdl=clamp(\ntoonNdl+(toonNdl-vec3(1.0))*toonTextureAdditiveColor.a,\n0.0,\n1.0\n)+toonTextureAdditiveColor.rgb;\n#endif\ndiffuseBase+=mix(info.diffuse*shadow,toonNdl*info.diffuse,info.isToon);\n#elif defined(IGNORE_DIFFUSE_WHEN_TOON_TEXTURE_DISABLED)\ndiffuseBase+=info.diffuse;\n#else\ndiffuseBase+=(info.diffuse*shadow);\n#endif\n";
+             const finalDiffuse = /* glsl */ "\n#ifdef EMISSIVEASILLUMINATION\nvec3 finalDiffuse=clamp(diffuseBase*diffuseColor+vAmbientColor,0.0,1.0)*baseColor.rgb;\n#else\n#ifdef LINKEMISSIVEWITHDIFFUSE\nvec3 finalDiffuse=clamp((diffuseBase+emissiveColor)*diffuseColor+vAmbientColor,0.0,1.0)*baseColor.rgb;\n#else\nvec3 finalDiffuse=clamp(diffuseBase*diffuseColor+emissiveColor+vAmbientColor,0.0,1.0)*baseColor.rgb;\n#endif\n#endif\n";
+             codes[`!${EscapeRegExp(finalDiffuse)}`] = /* glsl */ `
+ #ifdef APPLY_AMBIENT_COLOR_TO_DIFFUSE
+diff --git a/node_modules/babylon-mmd/esm/Loader/ShadersWGSL/mmdStandard.js b/node_modules/babylon-mmd/esm/Loader/ShadersWGSL/mmdStandard.js
+index d792caf..c52ba7a 100644
+--- a/node_modules/babylon-mmd/esm/Loader/ShadersWGSL/mmdStandard.js
++++ b/node_modules/babylon-mmd/esm/Loader/ShadersWGSL/mmdStandard.js
+@@ -37,7 +37,7 @@ finalWorld=(finalWorld*influence);
+             codes[`!${EscapeRegExp("struct lightingInfo\n{")}`] = /* wgsl */ "\nstruct lightingInfo {\n#ifdef TOON_TEXTURE\n#ifndef NDOTL\nndl: f32,\n#endif\nisToon: f32,\n#endif\n";
+             // ndl might be clamped to 1.0
+             codes[`!${EscapeRegExp("result.diffuse=ndl*diffuseColor*attenuation;")}`] = /* wgsl */ "\n#ifdef TOON_TEXTURE\nresult.diffuse=diffuseColor*attenuation;result.ndl=ndl;result.isToon=1.0;\n#elif defined(IGNORE_DIFFUSE_WHEN_TOON_TEXTURE_DISABLED)\nresult.diffuse=diffuseColor*attenuation;\n#else\nresult.diffuse=(ndl*diffuseColor*attenuation);\n#endif\n";
+-            codes[`!${EscapeRegExp("diffuseBase+=info.diffuse*shadow;")}`] = /* wgsl */ "\n#ifdef TOON_TEXTURE\ntoonNdl=vec3f(clamp(info.ndl*shadow,0.02,0.98));toonNdl.r=textureSample(toonSampler,toonSamplerSampler,vec2f(0.5,toonNdl.r)).r;toonNdl.g=textureSample(toonSampler,toonSamplerSampler,vec2f(0.5,toonNdl.g)).g;toonNdl.b=textureSample(toonSampler,toonSamplerSampler,vec2f(0.5,toonNdl.b)).b;\n#ifdef TOON_TEXTURE_COLOR\ntoonNdl=mix(\nvec3f(1.0),\ntoonNdl*uniforms.toonTextureMultiplicativeColor.rgb,\nuniforms.toonTextureMultiplicativeColor.a\n);toonNdl=clamp(\ntoonNdl+(toonNdl-vec3f(1.0))*uniforms.toonTextureAdditiveColor.a,\nvec3f(0.0),\nvec3f(1.0)\n)+uniforms.toonTextureAdditiveColor.rgb;\n#endif\ndiffuseBase+=mix(info.diffuse*shadow,toonNdl*info.diffuse,info.isToon);\n#elif defined(IGNORE_DIFFUSE_WHEN_TOON_TEXTURE_DISABLED)\ndiffuseBase+=info.diffuse;\n#else\ndiffuseBase+=(info.diffuse*shadow);\n#endif\n";
++            codes[`!${EscapeRegExp("diffuseBase+=info.diffuse*shadow;")}`] = /* wgsl */ "\n#ifdef TOON_TEXTURE\n#ifdef TOON_SHADOW\ntoonNdl=vec3f(clamp(mix(uniforms.toonShadowParams.x,1.0-uniforms.toonShadowParams.x,shadow),uniforms.toonShadowParams.y,1.0-uniforms.toonShadowParams.y));\n#else\ntoonNdl=vec3f(clamp(info.ndl*shadow,0.02,0.98));\n#endif\ntoonNdl.r=textureSample(toonSampler,toonSamplerSampler,vec2f(0.5,toonNdl.r)).r;toonNdl.g=textureSample(toonSampler,toonSamplerSampler,vec2f(0.5,toonNdl.g)).g;toonNdl.b=textureSample(toonSampler,toonSamplerSampler,vec2f(0.5,toonNdl.b)).b;\n#ifdef TOON_TEXTURE_COLOR\ntoonNdl=mix(\nvec3f(1.0),\ntoonNdl*uniforms.toonTextureMultiplicativeColor.rgb,\nuniforms.toonTextureMultiplicativeColor.a\n);toonNdl=clamp(\ntoonNdl+(toonNdl-vec3f(1.0))*uniforms.toonTextureAdditiveColor.a,\nvec3f(0.0),\nvec3f(1.0)\n)+uniforms.toonTextureAdditiveColor.rgb;\n#endif\ndiffuseBase+=mix(info.diffuse*shadow,toonNdl*info.diffuse,info.isToon);\n#elif defined(IGNORE_DIFFUSE_WHEN_TOON_TEXTURE_DISABLED)\ndiffuseBase+=info.diffuse;\n#else\ndiffuseBase+=(info.diffuse*shadow);\n#endif\n";
+             const finalDiffuse = /* wgsl */ "\n#ifdef EMISSIVEASILLUMINATION\nvar finalDiffuse: vec3f=clamp(diffuseBase*diffuseColor+uniforms.vAmbientColor,vec3f(0.0),vec3f(1.0))*baseColor.rgb;\n#else\n#ifdef LINKEMISSIVEWITHDIFFUSE\nvar finalDiffuse: vec3f=clamp((diffuseBase+emissiveColor)*diffuseColor+uniforms.vAmbientColor,vec3f(0.0),vec3f(1.0))*baseColor.rgb;\n#else\nvar finalDiffuse: vec3f=clamp(diffuseBase*diffuseColor+emissiveColor+uniforms.vAmbientColor,vec3f(0.0),vec3f(1.0))*baseColor.rgb;\n#endif\n#endif\n";
+             codes[`!${EscapeRegExp(finalDiffuse)}`] = /* wgsl */ `
+ #ifdef APPLY_AMBIENT_COLOR_TO_DIFFUSE
+diff --git a/node_modules/babylon-mmd/esm/Loader/mmdPluginMaterial.js b/node_modules/babylon-mmd/esm/Loader/mmdPluginMaterial.js
+index 38e8c2d..3d31b4b 100644
+--- a/node_modules/babylon-mmd/esm/Loader/mmdPluginMaterial.js
++++ b/node_modules/babylon-mmd/esm/Loader/mmdPluginMaterial.js
+@@ -53,6 +53,7 @@ export class MmdPluginMaterialDefines extends MaterialDefines {
+     TEXTURE_COLOR = false;
+     SPHERE_TEXTURE_COLOR = false;
+     TOON_TEXTURE_COLOR = false;
++    TOON_SHADOW = false;
+     SDEF = false;
+ }
+ export var MmdPluginMaterialSphereTextureBlendMode;
+@@ -72,8 +73,10 @@ export class MmdPluginMaterial extends MaterialPluginBase {
+     sphereTextureAdditiveColor = new Color4(0, 0, 0, 0);
+     toonTextureMultiplicativeColor = new Color4(1, 1, 1, 1);
+     toonTextureAdditiveColor = new Color4(0, 0, 0, 0);
++    toonShadowParams = new Color4(0.05, 0.24, 0, 0);
+     _applyAmbientColorToDiffuse = true;
+     _clampAlpha = true;
++    _useToonShadow = false;
+     _useTextureColor = false;
+     _useSphereTextureColor = false;
+     _useToonTextureColor = false;
+@@ -142,6 +145,15 @@ export class MmdPluginMaterial extends MaterialPluginBase {
+         this._clampAlpha = value;
+         this.markAllDefinesAsDirty();
+     }
++    get useToonShadow() {
++        return this._useToonShadow;
++    }
++    set useToonShadow(value) {
++        if (this._useToonShadow === value)
++            return;
++        this._useToonShadow = value;
++        this.markAllDefinesAsDirty();
++    }
+     get useTextureColor() {
+         return this._useTextureColor;
+     }
+@@ -214,6 +226,7 @@ export class MmdPluginMaterial extends MaterialPluginBase {
+                 uniformBuffer.updateDirectColor4("toonTextureMultiplicativeColor", this.toonTextureMultiplicativeColor);
+                 uniformBuffer.updateDirectColor4("toonTextureAdditiveColor", this.toonTextureAdditiveColor);
+             }
++            uniformBuffer.updateDirectColor4("toonShadowParams", this.toonShadowParams);
+             if (defines.SPHERE_TEXTURE && subMesh.effect !== null) {
+                 this._material.bindView(subMesh.effect);
+             }
+@@ -239,6 +252,7 @@ export class MmdPluginMaterial extends MaterialPluginBase {
+             defines.SPHERE_TEXTURE_BLEND_MODE_ADD = this._sphereTextureBlendMode === MmdPluginMaterialSphereTextureBlendMode.Add;
+             // todo: support sub texture mode
+             defines.TOON_TEXTURE = this._toonTexture !== null && texturesEnabled;
++            defines.TOON_SHADOW = this._useToonShadow && defines.TOON_TEXTURE;
+             defines.IGNORE_DIFFUSE_WHEN_TOON_TEXTURE_DISABLED = this._ignoreDiffuseWhenToonTextureIsNull;
+             defines.APPLY_AMBIENT_COLOR_TO_DIFFUSE = this._applyAmbientColorToDiffuse;
+             defines.CLAMP_ALPHA = this._clampAlpha;
+@@ -252,6 +266,7 @@ export class MmdPluginMaterial extends MaterialPluginBase {
+             defines.SPHERE_TEXTURE_BLEND_MODE_MULTIPLY = false;
+             defines.SPHERE_TEXTURE_BLEND_MODE_ADD = false;
+             defines.TOON_TEXTURE = false;
++            defines.TOON_SHADOW = false;
+             defines.IGNORE_DIFFUSE_WHEN_TOON_TEXTURE_DISABLED = false;
+             defines.APPLY_AMBIENT_COLOR_TO_DIFFUSE = false;
+             defines.CLAMP_ALPHA = false;
+@@ -298,7 +313,8 @@ export class MmdPluginMaterial extends MaterialPluginBase {
+                 { name: "sphereTextureMultiplicativeColor", size: 4, type: "vec4" },
+                 { name: "sphereTextureAdditiveColor", size: 4, type: "vec4" },
+                 { name: "toonTextureMultiplicativeColor", size: 4, type: "vec4" },
+-                { name: "toonTextureAdditiveColor", size: 4, type: "vec4" }
++                { name: "toonTextureAdditiveColor", size: 4, type: "vec4" },
++                { name: "toonShadowParams", size: 4, type: "vec4" }
+             ]
+         };
+     }
+diff --git a/node_modules/babylon-mmd/esm/Loader/mmdStandardMaterial.d.ts b/node_modules/babylon-mmd/esm/Loader/mmdStandardMaterial.d.ts
+index c4d15a0..a92151d 100644
+--- a/node_modules/babylon-mmd/esm/Loader/mmdStandardMaterial.d.ts
++++ b/node_modules/babylon-mmd/esm/Loader/mmdStandardMaterial.d.ts
+@@ -70,6 +70,18 @@ export declare class MmdStandardMaterial extends StandardMaterial {
+      */
+     get toonTexture(): Nullable<Texture>;
+     set toonTexture(value: Nullable<Texture>);
++    /**
++     * Get or set toon shadow params (x: sampleThreshold, y: blendThreshold)
++     */
++    get toonShadowParams(): Color4;
++    set toonShadowParams(value: Color4);
++    /**
++     * Get or set whether to use the toon shadow rendering path
++     * When true, toon sampling is driven purely by the shadow map
++     * When false (default), toon sampling uses the original N·L × shadow formula
++     */
++    get useToonShadow(): boolean;
++    set useToonShadow(value: boolean);
+     /**
+      * If toe on texture is not set, decide whether to treat it as if it had white toon texture applied (default: true)
+      *
+diff --git a/node_modules/babylon-mmd/esm/Loader/mmdStandardMaterial.js b/node_modules/babylon-mmd/esm/Loader/mmdStandardMaterial.js
+index 2406c87..5bc5249 100644
+--- a/node_modules/babylon-mmd/esm/Loader/mmdStandardMaterial.js
++++ b/node_modules/babylon-mmd/esm/Loader/mmdStandardMaterial.js
+@@ -146,6 +146,26 @@ export class MmdStandardMaterial extends StandardMaterial {
+     set toonTexture(value) {
+         this._pluginMaterial.toonTexture = value;
+     }
++    /**
++     * Get or set toon shadow params (x: mixMin, y: mixMax, z: clampMin, w: clampMax)
++     */
++    get toonShadowParams() {
++        return this._pluginMaterial.toonShadowParams;
++    }
++    set toonShadowParams(value) {
++        this._pluginMaterial.toonShadowParams = value;
++    }
++    /**
++     * Get or set whether to use the toon shadow rendering path
++     * When true, toon sampling is driven purely by the shadow map
++     * When false (default), toon sampling uses the original N·L × shadow formula
++     */
++    get useToonShadow() {
++        return this._pluginMaterial.useToonShadow;
++    }
++    set useToonShadow(value) {
++        this._pluginMaterial.useToonShadow = value;
++    }
+     /**
+      * If toe on texture is not set, decide whether to treat it as if it had white toon texture applied (default: true)
+      *
+diff --git a/node_modules/babylon-mmd/esm/Loader/sdefInjector.d.ts b/node_modules/babylon-mmd/esm/Loader/sdefInjector.d.ts
+index 68c56d5..06f05c4 100644
+--- a/node_modules/babylon-mmd/esm/Loader/sdefInjector.d.ts
++++ b/node_modules/babylon-mmd/esm/Loader/sdefInjector.d.ts
+@@ -5,6 +5,11 @@ import type { AbstractEngine } from "@babylonjs/core/Engines/abstractEngine";
+  * This class is used to inject SDEF code into the vertex shader
+  */
+ export declare class SdefInjector {
++    /**
++     * When set to false, SDEF injection is skipped globally.
++     * Disable this when using bone scaling.
++     */
++    static Enabled: boolean;
+     /**
+      * Override engine create effect
+      *
+diff --git a/node_modules/babylon-mmd/esm/Loader/sdefInjector.js b/node_modules/babylon-mmd/esm/Loader/sdefInjector.js
+index a9db788..5549cde 100644
+--- a/node_modules/babylon-mmd/esm/Loader/sdefInjector.js
++++ b/node_modules/babylon-mmd/esm/Loader/sdefInjector.js
+@@ -10,6 +10,12 @@ import { SdefVertex as sdefVertexWgsl } from "./ShadersWGSL/sdefVertex";
+  * This class is used to inject SDEF code into the vertex shader
+  */
+ export class SdefInjector {
++    /**
++     * When set to false, SDEF injection is skipped globally.
++     * Disable this when using bone scaling — SDEF does not support
++     * per-bone custom scale in the current implementation.
++     */
++    static Enabled = true;
+     // NOTE: be careful with the Babylon.js createEffect method changes
+     /**
+      * Override engine create effect
+@@ -41,6 +47,8 @@ export class SdefInjector {
+                     extraInitializationsAsync: extraInitializationsAsync
+                 };
+             }
++            if (!SdefInjector.Enabled)
++                return originalCreateEffect(baseName, effectCreationOptions, this);
+             if (effectCreationOptions.uniformsNames.includes("mBones") || effectCreationOptions.samplers.includes("boneSampler")) {
+                 if (effectCreationOptions.defines.indexOf("#define SDEF") === -1) {
+                     effectCreationOptions.attributes.push(MmdBufferKind.MatricesSdefCKind);
+diff --git a/node_modules/babylon-mmd/esm/Runtime/Animation/mmdCompositeRuntimeModelAnimation.js b/node_modules/babylon-mmd/esm/Runtime/Animation/mmdCompositeRuntimeModelAnimation.js
+index c261b7d..e7db6c8 100644
+--- a/node_modules/babylon-mmd/esm/Runtime/Animation/mmdCompositeRuntimeModelAnimation.js
++++ b/node_modules/babylon-mmd/esm/Runtime/Animation/mmdCompositeRuntimeModelAnimation.js
+@@ -261,6 +261,10 @@ export class MmdCompositeRuntimeModelAnimation {
+             normalizer = 1.0 / totalWeight;
+             visibility = 0;
+         }
++        // MMD display (visibility) keyframes are boolean. When multiple animations are mixed,
++        // the model must be hidden if any active layer hides it; otherwise layered blend would
++        // wrongly turn "hidden" into semi-transparency (weighted alpha average).
++        let isDisplayed = true;
+         // ref: https://www.gamedev.net/forums/topic/645242-quaternions-and-animation-blending-questions/5076696/
+         for (let i = 0; i < activeAnimationSpans.length; ++i) {
+             const span = activeAnimationSpans[i];
+@@ -364,6 +368,9 @@ export class MmdCompositeRuntimeModelAnimation {
+                 }
+             }
+             if (meshes.length !== 0) {
++                if (meshes[0].visibility === 0) {
++                    isDisplayed = false;
++                }
+                 visibility += meshes[0].visibility * weight;
+             }
+         }
+@@ -392,14 +399,21 @@ export class MmdCompositeRuntimeModelAnimation {
+         for (const [morphIndex, result] of morphResultMap) {
+             morphController.setMorphWeightFromIndex(morphIndex, result);
+         }
+-        if (Math.abs(visibility - 1) < 1e-6) {
+-            for (let i = 0; i < meshes.length; ++i) {
+-                meshes[i].visibility = 1;
++        if (isDisplayed) {
++            if (Math.abs(visibility - 1) < 1e-6) {
++                for (let i = 0; i < meshes.length; ++i) {
++                    meshes[i].visibility = 1;
++                }
++            }
++            else {
++                for (let i = 0; i < meshes.length; ++i) {
++                    meshes[i].visibility = visibility;
++                }
+             }
+         }
+         else {
+             for (let i = 0; i < meshes.length; ++i) {
+-                meshes[i].visibility = visibility;
++                meshes[i].visibility = 0;
+             }
+         }
+         for (const [ikSolverIndex, result] of ikSolverResultMap) {
+diff --git a/node_modules/babylon-mmd/esm/Runtime/appendTransformSolver.js b/node_modules/babylon-mmd/esm/Runtime/appendTransformSolver.js
+index ba2aec3..d232877 100644
+--- a/node_modules/babylon-mmd/esm/Runtime/appendTransformSolver.js
++++ b/node_modules/babylon-mmd/esm/Runtime/appendTransformSolver.js
+@@ -23,6 +23,10 @@ export class AppendTransformSolver {
+      * Similar to parent in bone hierarchy
+      */
+     targetBone;
++    /**
++     * Whether the target bone has physics rigid bodies (used for post-physics append transform)
++     */
++    targetBoneHasPhysics;
+     /**
+      * Append transformed position
+      */
+@@ -43,6 +47,7 @@ export class AppendTransformSolver {
+         this.affectPosition = (boneFlag & PmxObject.Bone.Flag.HasAppendMove) !== 0;
+         this.ratio = boneAppendTransformMetadata.ratio;
+         this.targetBone = targetBone;
++        this.targetBoneHasPhysics = targetBone.rigidBodyIndices.length > 0;
+     }
+     static _IdentityQuaternion = Quaternion.Identity();
+     static _TargetBoneWorldMatrix = Matrix.Identity();
+@@ -50,8 +55,10 @@ export class AppendTransformSolver {
+      * Updates the solver
+      * @param animatedRotation rotation animation evaluation result with bone morphing applied
+      * @param animatedPositionOffset position animation evaluation result with bone morphing applied
++     * @param postPhysics when true, extract target rotation from the physics-updated world matrix
++     *        instead of the local bone quaternion. Only pass true from afterPhysics context.
+      */
+-    update(animatedRotation, animatedPositionOffset) {
++    update(animatedRotation, animatedPositionOffset, postPhysics = false) {
+         const targetBone = this.targetBone;
+         if (this.affectRotation) {
+             const appendRotation = this.appendRotation;
+@@ -59,15 +66,29 @@ export class AppendTransformSolver {
+                 const targetBoneWorldMatrix = targetBone.getWorldMatrixToRef(AppendTransformSolver._TargetBoneWorldMatrix);
+                 Quaternion.FromRotationMatrixToRef(targetBoneWorldMatrix, appendRotation);
+             }
++            else if (postPhysics && this.targetBoneHasPhysics) {
++                // Post-physics: grant the target's LOCAL physics rotation.
++                //
++                // `_savedPhysicsRotation` was decomposed in MmdModel.afterPhysics() right
++                // after syncBones(): local = physicsWorldRot * inverse(parentWorldRot).
++                // This mirrors the reference GrantSolver.updatePhysics(), which grants
++                // parentBone.quaternion (a LOCAL quaternion written back by physics).
++                //
++                // We must NOT grant the target's world rotation: it contains the model
++                // root rotation, which this bone already inherits through its parent
++                // chain — applying it locally would double the model rotation (the
++                // "chest rotates faster than the model" symptom).
++                appendRotation.copyFrom(targetBone._savedPhysicsRotation);
++            }
++            else if (targetBone.appendTransformSolver !== null && targetBone.appendTransformSolver.affectRotation) {
++                appendRotation.copyFrom(targetBone.appendTransformSolver.appendRotation);
++            }
+             else {
+-                if (targetBone.appendTransformSolver !== null && targetBone.appendTransformSolver.affectRotation) {
+-                    appendRotation.copyFrom(targetBone.appendTransformSolver.appendRotation);
+-                }
+-                else {
+-                    targetBone.getAnimatedRotationToRef(appendRotation);
+-                }
++                targetBone.getAnimatedRotationToRef(appendRotation);
+             }
+-            if (targetBone.ikChainInfo !== null && !this.isLocal) {
++            if (targetBone.ikChainInfo !== null && !this.isLocal && !(postPhysics && this.targetBoneHasPhysics)) {
++                // The physics-derived local rotation is already the target's final
++                // orientation; multiplying the IK rotation on top would double-count.
+                 targetBone.ikChainInfo.ikRotation.multiplyToRef(appendRotation, appendRotation);
+             }
+             if (this.ratio !== 1) {
+diff --git a/node_modules/babylon-mmd/esm/Runtime/mmdFootIk.d.ts b/node_modules/babylon-mmd/esm/Runtime/mmdFootIk.d.ts
+new file mode 100644
+index 0000000..459fad9
+--- /dev/null
++++ b/node_modules/babylon-mmd/esm/Runtime/mmdFootIk.d.ts
+@@ -0,0 +1,23 @@
++import { MmdRuntimeBone } from "./mmdRuntimeBone";
++/**
++ * MMD 原版解析式足 IK 运行时 (新方案, 顶替旧 LegIkSolver)
++ *
++ * 模型级单例: 帧末 capture() 读取关节世界位置 → 环形平滑 → 下一帧 beforePhysics
++ * 中 solve() 用滞后位置做 8 相位解析求解 (FUN_004A6520), 写 ikRotation 覆盖到
++ * 膝/踝/足尖, 由 MmdModel 的 beforePhysics/afterPhysics 驱动。
++ */
++export declare class MmdFootIkRuntime {
++    constructor(model: import("./mmdModel").MmdModel, runtimeBones: MmdRuntimeBone[], ikStates: Uint8Array);
++    /**
++     * 帧末捕获: 读取本帧最终骨骼世界位置 (含物理) 到各关键点 latest 槽
++     */
++    capture(): void;
++    /**
++     * 求解: 环形平滑 + 8 相位解析足 IK, 写 ikRotation 覆盖
++     */
++    solve(): void;
++}
++/**
++ * FUN_004A60F0 单骨骼约束瞄准求解器 (mode 0..5)
++ */
++export declare function legIkAimBone(out: import("@babylonjs/core/Maths/math.vector").Quaternion, qBone: import("@babylonjs/core/Maths/math.vector").Quaternion, posA: import("@babylonjs/core/Maths/math.vector").Vector3, posB: import("@babylonjs/core/Maths/math.vector").Vector3, mode: number): void;
+diff --git a/node_modules/babylon-mmd/esm/Runtime/mmdFootIk.js b/node_modules/babylon-mmd/esm/Runtime/mmdFootIk.js
+new file mode 100644
+index 0000000..a52c4d8
+--- /dev/null
++++ b/node_modules/babylon-mmd/esm/Runtime/mmdFootIk.js
+@@ -0,0 +1,443 @@
++/**
++ * ============================================================================
++ * MmdFootIkRuntime — MMD 原版解析式足 IK 的完整复刻 (新方案, 顶替旧 LegIkSolver)
++ * ----------------------------------------------------------------------------
++ * 依据: MikuMikuDance.exe v9.32 (ImageBase 0x400000) 反编译:
++ *   - FUN_004B5760  足IK通道: 按 9B Shift-JIS 名字特判 "左足ＩＫ"(0x531154)/"右足ＩＫ"(0x531148),
++ *                   读 IK 使能位并调主求解器 (唯一调用点 0x4B5850)。
++ *   - FUN_004A6520  足IK主求解器: 8 相位一次性解析求解 (非 CCD 迭代), 输出 13 个关节四元数。
++ *   - FUN_004A60F0  单骨骼约束瞄准求解器 (mode 0..5, 本文件内 legIkAimBone 忠实移植)。
++ *   - FUN_004B75C0 / FUN_004A8BC0  足IK输入准备: 23 关键点位置 → 30 槽环形历史
++ *                   下移 + 非哨兵平均 + 原地写回 (y=−999.0 哨兵 = 未设置)。
++ *   - FUN_004A89B0  足IK状态复位。
++ *
++ * 与旧 LegIkSolver (已废弃) 的本质区别 — 逐条对应先前交叉分析定位的根因:
++ *   1. 腿链 = 按骨骼名解析的固定链 (胯→膝→踝→足尖), 不复用 PMX IK links。
++ *      旧实现把 PMX links [左足首, 左ひざ] 误当 [胯, 膝], 轴退化提前 return → 膝永不弯。
++ *   2. IK 目标 = 帧末捕获 + 环形平滑的"滞后"位置。
++ *      旧实现读当前帧 FK 后的足ＩＫ位置, 目标随腰刚性移动 → d(胯→目标) 不变 → 膝弯角≈0。
++ *   3. 踝部 = mode1 瞄准 × mode5 铰链复合 + ±30° 限位, 保持脚底水平 (对齐 0x4A6B33/0x4A6BE4)。
++ *   4. 膝 = asin(dot) 主瞄准 + mode4 约束瞄准 + ±35° 硬钳 (对齐 0x4A68B3..0x4A6994 / 0x4A6A06)。
++ *   5. 足尖 = fold 判定 + 退化轴修正 (对齐 FUN_004A6520 相位 6, 0x4A8321..0x4A89AC)。
++ *
++ * 挂载点 (mmdModel.js):
++ *   - beforePhysics(): resetTransformState 之后、_update(false) 之前调 solve()。
++ *   - afterPhysics():  _update(true) 之后调 capture() (读本帧最终世界位置, 含物理)。
++ *   - 足ＩＫ 骨不再挂 CCD IkSolver (bone.ikSolver = null), 由本运行时统一驱动。
++ *
++ * 求解时序与 MMD 一致: 帧 N 末 capture 本帧姿态 → 帧 N+1 初 smooth+solve
++ * (使用帧 N 的平滑位置) → 写 ikRotation 覆盖 → 随 FK 遍历生效。
++ * ============================================================================
++ */
++import { Matrix, Quaternion, Vector3 } from "@babylonjs/core/Maths/math.vector";
++import { IkChainInfo } from "./ikChainInfo";
++
++/* ---- MMD .rdata 实测常量 ---- */
++/** 关节"未设置"哨兵 (0x5311B0, double −999.0); 用作关键点 y 分量 */
++const SENTINEL_Y = -999.0;
++/** 膝限位 ±35° = ±0.610865 (0x5311A4/0x5311A8) */
++const KNEE_CLAMP_RAD = 0.610865;
++/** 踝/足首限位 ±30° = ±0.523599 (0x53119C/0x5311A0) */
++const ANKLE_CLAMP_RAD = 0.523599;
++/** 足尖 fold 判定: 点积阈值 (0x531198) */
++const TOE_FOLD_DOT = -0.3;
++/** 足尖 fold 判定: |dx| 阈值 (0x531194) */
++const TOE_FOLD_DX = 75.0;
++/** 足尖 fold 判定: dx 阈值 (0x52960C) */
++const TOE_FOLD_DX2 = 0.5;
++/** 退化瞄准轴 (0, −0.7, −1) (0x531190 / 0x5295E8) */
++const DEGRADE_AXIS = new Vector3(0, -0.7, -1);
++/** 平滑窗口上限 30 (0x1E, FUN_004B75C0 钳制) */
++const MAX_SMOOTH_WINDOW = 30;
++/** 长度/叉积退化阈值 */
++const EPS = 1.0e-6;
++
++/* ---- 腿链骨骼名解析表 (每个槽位按候选名顺序匹配, 首个命中即用) ---- */
++const LEG_A_NAMES = {
++    hip: ["左足"],                 // 胯 (腿根)
++    knee: ["左ひざ"],              // 膝
++    ankle: ["左足首"],             // 踝
++    toe: ["左つま先", "左足先EX", "左足先"], // 足尖
++    ikTarget: ["左足ＩＫ"],        // IK 目标 (足IK骨自身)
++    ankleRef: ["左足首D", "左つま先", "左足首"] // 踝限位参考 (mode5 铰链用)
++};
++const LEG_B_NAMES = {
++    hip: ["右足"],
++    knee: ["右ひざ"],
++    ankle: ["右足首"],
++    toe: ["右つま先", "右足先EX", "右足先"],
++    ikTarget: ["右足ＩＫ"],
++    ankleRef: ["右足首D", "右つま先", "右足首"]
++};
++
++/**
++ * 按候选名列表在 runtimeBones 中解析骨骼
++ * @returns 命中骨骼或 null
++ */
++function resolveBone(runtimeBones, candidates) {
++    for (let i = 0; i < candidates.length; ++i) {
++        const name = candidates[i];
++        for (let j = 0; j < runtimeBones.length; ++j) {
++            if (runtimeBones[j].name === name)
++                return runtimeBones[j];
++        }
++    }
++    return null;
++}
++
++function clamp01(x) {
++    return Math.max(-1.0, Math.min(1.0, x));
++}
++
++/**
++ * ============================================================================
++ * legIkAimBone — FUN_004A60F0 忠实移植
++ * 单骨骼约束瞄准: 使骨骼 +X 轴指向 (posB − posA) 方向, 按 mode 施加解剖学约束。
++ * 8 阶段: 局部参考系 → 方向变换 → 约束裁剪(mode5 抹Y) → 水平投影 → 分模式
++ * (c,s,pitch) → 瞄准矩阵 RotY → 后段组合(mode≥4 右乘 2D 块; mode1/2/3 右乘 RotY(−pitch))
++ * → 四元数输出 + 手性修正 out.y=−out.y。
++ * @param out   输出四元数
++ * @param qBone 骨骼当前旋转
++ * @param posA  参考/目标关节位置
++ * @param posB  本关节位置
++ * @param mode  约束模式 0..5
++ * ============================================================================
++ */
++const _qInv = new Quaternion();
++const _M = new Matrix();
++const _Mflip = new Matrix();
++const _d = new Vector3();
++const _v = new Vector3();
++const _dir = new Vector3();
++const _Maim = new Matrix();
++const _Mblock = new Matrix();
++const _Mout = new Matrix();
++const _Mrot = new Matrix();
++export function legIkAimBone(out, qBone, posA, posB, mode) {
++    // --- 1) 骨骼局部参考系: M = R(qBone⁻¹) · RotY(π) (+X 轴指向子骨) ---
++    Quaternion.InverseToRef(qBone, _qInv);
++    Matrix.FromQuaternionToRef(_qInv, _M);
++    Matrix.RotationYToRef(Math.PI, _Mflip);
++    _M.multiplyToRef(_Mflip, _M);
++
++    // --- 2) 目标方向 → 骨骼局部坐标 (w=1 变换) ---
++    posB.subtractToRef(posA, _d);
++    if (_d.lengthSquared() < EPS) {
++        out.set(0, 0, 0, 1); // 关节重合(退化), 无解 → 单位旋转
++        return;
++    }
++    Vector3.TransformCoordinatesToRef(_d, _M, _v);
++
++    // --- 3) 按模式裁剪方向分量 + 归一化 (mode 5 抹 Y = 铰链锁定弯折平面) ---
++    _dir.set(_v.x, mode === 5 ? 0 : _v.y, _v.z);
++    _dir.normalize();
++
++    // --- 4) 水平投影长度 ---
++    const len = Math.sqrt(_dir.x * _dir.x + _dir.z * _dir.z);
++    if (len < EPS) {
++        out.set(0, 0, 0, 1); // 目标方向与骨骼轴向重合, 无水平解
++        return;
++    }
++
++    // --- 5) 分模式提取 (c,s) = 瞄准角余弦/正弦, pitch = 象限修正后的转角 ---
++    let c;
++    let s;
++    let pitch = 0;
++    if (mode === 5) { // 铰链(膝): 0x4A6234
++        c = -_dir.z / len;
++        s = _dir.x / len;
++        pitch = Math.asin(clamp01(c));
++        pitch += Math.sign(s * c) * len * Math.abs(Math.asin(clamp01(s))); // 象限修正
++    }
++    else {
++        c = _dir.x / len;
++        s = _dir.z / len;
++        if (mode === 1) { // 单轴: 0x4A627A
++            pitch = Math.asin(clamp01(c));
++            if (s < 0) pitch = -pitch;
++        }
++        else if (mode >= 2) { // 双轴(2/3/4): 0x4A6313 + 象限修正
++            pitch = Math.asin(clamp01(c));
++            pitch += Math.sign(s * c) * len * Math.abs(Math.asin(clamp01(s)));
++        }
++        // mode 0: 通用分支, (c,s) 同上, 不使用 pitch (0x4A6304 分量交换分支以 (c,s) 表达)
++    }
++
++    // --- 6) 瞄准矩阵 Maim = RotY(θ), cosθ=c, sinθ=s (0x4A62AE..0x4A62FA) ---
++    const theta = Math.atan2(s, c);
++    Matrix.RotationYToRef(-theta, _Maim);
++
++    // --- 7) 后段组合 (0x4A63D4..0x4A64F0) ---
++    _Mout.copyFrom(_Maim);
++    if (mode >= 4) {
++        // mode≥4: 右乘由 (c, −s) 构成的 2D 旋转块 (0x4A645D/0x4A6477)
++        Matrix.RotationYToRef(theta, _Mblock);
++        _Mout.multiplyToRef(_Mblock, _Mout);
++    }
++    if (mode === 1 || mode === 2 || mode === 3) {
++        Matrix.RotationYToRef(-pitch, _Mrot);
++        _Mout.multiplyToRef(_Mrot, _Mout);
++    }
++
++    // --- 8) 输出: 矩阵 → 四元数, 手性修正 out.y = −out.y (0x4A64F2..0x4A6510) ---
++    Quaternion.FromRotationMatrixToRef(_Mout, out);
++    out.y = -out.y;
++}
++
++/**
++ * 关键点: 当前平滑位置 + 30 槽环形历史 (FUN_004A8BC0 语义)
++ */
++class FootKeyPoint {
++    constructor(bone) {
++        this.bone = bone;                            // 捕获源骨骼 (null = 无此关节)
++        this.latest = new Vector3(0, SENTINEL_Y, 0); // 当前(平滑后)位置槽
++        this.ring = [];                              // 环形历史 (30 槽)
++        for (let i = 0; i < MAX_SMOOTH_WINDOW; ++i) {
++            this.ring.push(new Vector3(0, SENTINEL_Y, 0));
++        }
++    }
++    get ready() {
++        return this.bone !== null && this.latest.y !== SENTINEL_Y;
++    }
++}
++
++/**
++ * ============================================================================
++ * MmdFootIkRuntime — 模型级足 IK 运行时 (每模型一个)
++ * 由 MmdModel 在骨架构建时创建 (SetMmdIK(true) 且模型含 左足ＩＫ/右足ＩＫ)。
++ * 帧流程: afterPhysics() 尾 → capture(); beforePhysics() 中 → solve()。
++ * ============================================================================
++ */
++export class MmdFootIkRuntime {
++    /** 模型对象 (MmdModel) */
++    model;
++    /** 模型级 IK 状态数组 (ikSolverStates), 全 0 = 模型级 IK 关闭 */
++    _ikStates;
++    /** 帧计数 (平滑窗口 = frame/10 钳 ≤30) */
++    _frameCount;
++    /** 腿长缓存 (FUN_004A6520 相位 1, −1 = 未初始化) */
++    _legLenCache;
++    /** 左右腿状态 */
++    _legs;
++
++    constructor(model, runtimeBones, ikStates) {
++        this.model = model;
++        this._ikStates = ikStates;
++        this._frameCount = 0;
++        this._legLenCache = -1.0;
++        this._legs = [this._buildLeg(runtimeBones, LEG_A_NAMES), this._buildLeg(runtimeBones, LEG_B_NAMES)];
++    }
++
++    _buildLeg(runtimeBones, names) {
++        const leg = {
++            hip: null, knee: null, ankle: null, toe: null, ikTarget: null, ankleRef: null
++        };
++        leg.hip = new FootKeyPoint(resolveBone(runtimeBones, names.hip));
++        leg.knee = new FootKeyPoint(resolveBone(runtimeBones, names.knee));
++        leg.ankle = new FootKeyPoint(resolveBone(runtimeBones, names.ankle));
++        leg.toe = new FootKeyPoint(resolveBone(runtimeBones, names.toe));
++        leg.ikTarget = new FootKeyPoint(resolveBone(runtimeBones, names.ikTarget));
++        leg.ankleRef = new FootKeyPoint(resolveBone(runtimeBones, names.ankleRef));
++        // 为被足 IK 覆盖的骨骼创建 ikChainInfo (updateWorldMatrix 中 ikRotation 由此生效)
++        if (leg.knee.bone !== null) leg.knee.bone.ikChainInfo = new IkChainInfo();
++        if (leg.ankle.bone !== null) leg.ankle.bone.ikChainInfo = new IkChainInfo();
++        if (leg.toe.bone !== null) leg.toe.bone.ikChainInfo = new IkChainInfo();
++        return leg;
++    }
++
++    /**
++     * 帧末捕获: 读取本帧最终骨骼世界位置 → 各关键点 latest 槽
++     * (对齐 MMD "原始值由上层在 FK 后从骨骼世界坐标提取"; 缺失骨骼写哨兵)
++     */
++    capture() {
++        const legs = this._legs;
++        for (let i = 0; i < legs.length; ++i) {
++            const leg = legs[i];
++            for (const key in leg) {
++                const kp = leg[key];
++                if (kp instanceof FootKeyPoint) {
++                    if (kp.bone !== null) {
++                        kp.bone.getWorldTranslationToRef(kp.latest);
++                    }
++                    else {
++                        kp.latest.set(0, SENTINEL_Y, 0);
++                    }
++                }
++            }
++        }
++        this._frameCount++;
++    }
++
++    /**
++     * 环形历史平滑 (FUN_004A8BC0): 历史下移 → 最新值入末槽 → 非哨兵平均原地写回。
++     * 窗口 = frame/10 钳 ≤30 (FUN_004B75C0 语义)。
++     */
++    _smooth() {
++        const window = Math.min(MAX_SMOOTH_WINDOW, Math.max(1, Math.floor(this._frameCount / 10)));
++        const legs = this._legs;
++        for (let i = 0; i < legs.length; ++i) {
++            const leg = legs[i];
++            for (const key in leg) {
++                const kp = leg[key];
++                if (!(kp instanceof FootKeyPoint) || kp.bone === null)
++                    continue;
++                const ring = kp.ring;
++                // 1) 历史下移 (丢最旧槽 0)
++                for (let k = 0; k < window - 1; ++k) {
++                    ring[k].copyFrom(ring[k + 1]);
++                }
++                // 2) 最新值压入末槽
++                ring[window - 1].copyFrom(kp.latest);
++                // 3) 非哨兵条目平均, 原地写回 latest
++                let cnt = 0;
++                let sx = 0, sy = 0, sz = 0;
++                for (let k = 0; k < window; ++k) {
++                    if (ring[k].y !== SENTINEL_Y) {
++                        cnt++;
++                        sx += ring[k].x; sy += ring[k].y; sz += ring[k].z;
++                    }
++                }
++                if (cnt > 0) {
++                    const inv = 1.0 / cnt;
++                    kp.latest.set(sx * inv, sy * inv, sz * inv);
++                }
++            }
++        }
++    }
++
++    /**
++     * 求解: 8 相位解析足 IK (FUN_004A6520), 写 ikRotation 覆盖到 膝/踝/足尖。
++     * 使用已捕获+平滑的滞后位置, 故腰旋转时目标停留在原地, 膝关节被迫弯曲。
++     */
++    solve() {
++        const ikStates = this._ikStates;
++        // 模型级 IK 关闭 (ikSolverStates 全 0) 时跳过足 IK
++        if (ikStates.length > 0 && ikStates.every((s) => s === 0))
++            return;
++        this._smooth();
++        const legs = this._legs;
++        for (let i = 0; i < legs.length; ++i) {
++            this._solveLeg(legs[i]);
++        }
++    }
++
++    _solveLeg(leg) {
++        // 未就绪 (缺骨/哨兵) → 跳过该腿 (对齐 MMD 哨兵分支)
++        if (!leg.hip.ready || !leg.knee.ready || !leg.ankle.ready || !leg.ikTarget.ready)
++            return;
++
++        const hipPos = leg.hip.latest;
++        const kneePos = leg.knee.latest;
++        const anklePos = leg.ankle.latest;
++        const ikTarget = leg.ikTarget.latest;
++
++        // ---- 相位 1: 腿长缓存 (一次性) ----
++        if (this._legLenCache < 0.0) {
++            this._legLenCache =
++                Vector3.Distance(anklePos, kneePos) + Vector3.Distance(kneePos, hipPos);
++        }
++
++        // ---- 相位 3/4: 膝主瞄准 (0x4A68B3..0x4A6994) ----
++        //   d_knee = 膝−胯; 目标方向 = IK目标−踝; axis=norm(cross); θ=asin(dot)
++        const kneeDir = kneePos.subtractToRef(hipPos, _kneeDir).normalize();
++        const targetDir = ikTarget.subtractToRef(anklePos, _targetDir).normalize();
++        const axis = Vector3.CrossToRef(kneeDir, targetDir, _axis);
++
++        let qKnee = null; // null = 轴退化, 不转 (对齐 MMD 角度连续趋 0)
++        if (axis.lengthSquared() > EPS) {
++            axis.normalize();
++            const theta = Math.asin(clamp01(Vector3.Dot(kneeDir, targetDir)));
++            Quaternion.RotationAxisToRef(axis, theta, _qAim);
++            // mode4 约束瞄准: qKnee = qPose(膝FK) * AimBone(qAim, 膝, IK目标, 4)
++            const kneeFK = leg.knee.bone.getAnimatedRotationToRef(_qKneeFK);
++            legIkAimBone(_qMode4, _qAim, kneePos, ikTarget, 4);
++            kneeFK.multiplyToRef(_qMode4, _qKnee);
++            // 膝限位硬钳 ±35° (0x5311A4/0x5311A8)
++            clampQuat(_qKnee, KNEE_CLAMP_RAD);
++            qKnee = _qKnee;
++        }
++
++        // ---- 相位 3/4: 踝 = mode1(瞄准) × mode5(铰链) 复合 (0x4A6B33/0x4A6BE4) ----
++        //   mode1: AimBone(踝FK, 踝, IK目标, 1); mode5: AimBone(qAnkle, 踝参考, IK目标, 5)
++        const ankleFK = leg.ankle.bone.getAnimatedRotationToRef(_qAnkleFK);
++        legIkAimBone(_qAnkle, ankleFK, anklePos, ikTarget, 1);
++        if (leg.ankleRef.ready) {
++            legIkAimBone(_qHinge, _qAnkle, leg.ankleRef.latest, ikTarget, 5);
++            _qAnkle.multiplyToRef(_qHinge, _qAnkle);
++        }
++        // 踝限位硬钳 ±30° (0x53119C/0x5311A0)
++        clampQuat(_qAnkle, ANKLE_CLAMP_RAD);
++
++        // ---- 写回 膝/踝 (覆盖式: ikRotation = qResult * localRotation⁻¹) ----
++        if (qKnee !== null)
++            applyOverrideRotation(leg.knee.bone, qKnee);
++        applyOverrideRotation(leg.ankle.bone, _qAnkle);
++
++        // ---- 相位 6: 足尖朝向修正 (0x4A8321..0x4A89AC) ----
++        if (leg.toe.ready) {
++            const toePos = leg.toe.latest;
++            // u = norm(踝−膝); v = norm(足尖−踝)
++            const u = anklePos.subtractToRef(kneePos, _u).normalize();
++            const v = toePos.subtractToRef(anklePos, _toeV).normalize();
++            const d = Vector3.Dot(u, v);
++            const fold = (d <= TOE_FOLD_DOT)
++                || (v.z <= 0.0 && Math.abs(v.x) < TOE_FOLD_DX && v.x < TOE_FOLD_DX2);
++            if (fold) {
++                // 足尖向后折: 链式合成 (踝 × 膝), 使足尖跟随脚部姿态
++                const base = qKnee !== null ? qKnee : _qIdentity;
++                base.multiplyToRef(_qAnkle, _qToe);
++            }
++            else {
++                // 正常: 退化轴 (0,−0.7,−1) 瞄准旋转
++                Quaternion.RotationAxisToRef(DEGRADE_AXIS, Math.asin(clamp01(d)), _qToe);
++            }
++            applyOverrideRotation(leg.toe.bone, _qToe);
++        }
++    }
++}
++const _kneeDir = new Vector3();
++const _targetDir = new Vector3();
++const _axis = new Vector3();
++const _u = new Vector3();
++const _toeV = new Vector3();
++const _qAim = new Quaternion();
++const _qKneeFK = new Quaternion();
++const _qAnkleFK = new Quaternion();
++const _qMode4 = new Quaternion();
++const _qKnee = new Quaternion();
++const _qAnkle = new Quaternion();
++const _qHinge = new Quaternion();
++const _qToe = new Quaternion();
++const _qIdentity = new Quaternion(0, 0, 0, 1);
++const _localRot = new Quaternion();
++const _invLocal = new Quaternion();
++
++/**
++ * 覆盖式写回: ikRotation = qResult * localRotation⁻¹
++ * (updateWorldMatrix 中 rotation = ikRotation * localRotation = qResult)
++ */
++function applyOverrideRotation(bone, qResult) {
++    const localRotation = bone.getAnimatedRotationToRef(_localRot);
++    const invLocal = Quaternion.InverseToRef(localRotation, _invLocal);
++    qResult.multiplyToRef(invLocal, bone.ikChainInfo.ikRotation);
++}
++
++/**
++ * 轴角硬钳: 把四元数旋转角度钳到 clampRad (保轴方向, 保持归一化)。
++ * 对齐 MMD "超限直接钉死在 ±limit" (0x4957B0/0x4957E0 同型语义)。
++ */
++function clampQuat(q, clampRad) {
++    const w = clamp01(q.w);
++    const angle = 2 * Math.acos(w);
++    if (angle <= clampRad)
++        return;
++    const sinHalf = Math.sin(angle * 0.5);
++    const axisLen = Math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z);
++    if (sinHalf < 1.0e-8 || axisLen < 1.0e-8)
++        return; // 零旋转/退化轴
++    const scale = Math.sin(clampRad * 0.5) / sinHalf;
++    q.x *= scale;
++    q.y *= scale;
++    q.z *= scale;
++    q.w = Math.cos(clampRad * 0.5);
++}
+diff --git a/node_modules/babylon-mmd/esm/Runtime/mmdModel.d.ts b/node_modules/babylon-mmd/esm/Runtime/mmdModel.d.ts
+index 139d885..ae68854 100644
+--- a/node_modules/babylon-mmd/esm/Runtime/mmdModel.d.ts
++++ b/node_modules/babylon-mmd/esm/Runtime/mmdModel.d.ts
+@@ -50,12 +50,40 @@ export declare class MmdModel implements IMmdModel {
+      * The array of final transform matrices of bones (ie. the matrix sent to shaders)
+      */
+     readonly worldTransformMatrices: Float32Array;
++    /**
++     * The array of per-bone custom scale factors (length = bones * 3, default 1.0)
++     *
++     * Stored as [sx, sy, sz] triplets for each bone index.
++     * Applied in _computeTransformMatrices around each bone's world pivot.
++     */
++    readonly boneScales: Float32Array;
++    /**
++     * Whether to propagate bone scale to child bones
++     *
++     * When true (default), setting a bone scale will also set the same scale
++     * to all descendant bones recursively
++     */
++    propagateScaleToChildren: boolean;
++    /**
++     * Whether to re-evaluate post-physics append transforms for physics-driven targets
++     *
++     * When disabled, bones processed in beforePhysics keep their pre-physics append
++     * values (pre-fix behavior). Can be toggled at runtime.
++     */
++    enablePostPhysicsAppendTransform: boolean;
+     /**
+      * Uint8Array that stores the state of IK solvers
+      *
+      * If `ikSolverState[MmdModel.runtimeBones[i].ikSolverIndex]` is 0, IK solver of `MmdModel.runtimeBones[i]` is disabled and if it is 1, IK solver is enabled
+      */
+     readonly ikSolverStates: Uint8Array;
++    /**
++     * MMD-compat 足 IK 运行时 (SetMmdIK(true) 且模型含 左足ＩＫ/右足ＩＫ 时挂载)
++     *
++     * 帧末 capture() 读取关节世界位置 → 环形平滑; 下一帧 beforePhysics 中
++     * solve() 用滞后位置做 8 相位解析求解 (FUN_004A6520)。null = 未挂载。
++     */
++    readonly footIk: import("./mmdFootIk").MmdFootIkRuntime | null;
+     /**
+      * Uint8Array that stores the state of RigidBody
+      *
+@@ -168,6 +196,26 @@ export declare class MmdModel implements IMmdModel {
+      * This method must be called after the physics stage
+      */
+     afterPhysics(): void;
++    /**
++     * Set a per-axis scale factor for a bone. The scale is applied around the bone's
++     * animated world pivot and affects vertices influenced by this bone.
++     *
++     * When `propagateScaleToChildren` is true (default), the scale is also applied
++     * to all descendant bones recursively.
++     *
++     * @param boneNameOrIndex Bone name or runtime bone index
++     * @param sx X-axis scale factor
++     * @param sy Y-axis scale factor
++     * @param sz Z-axis scale factor
++     */
++    setBoneScale(boneNameOrIndex: string | number, sx: number, sy: number, sz: number): void;
++    /**
++     * Get the current per-axis scale factor for a bone
++     *
++     * @param boneNameOrIndex Bone name or runtime bone index
++     * @returns {x, y, z} scale factors, or null if bone not found
++     */
++    getBoneScale(boneNameOrIndex: string | number): { x: number; y: number; z: number } | null;
+     private _update;
+     private _buildRuntimeSkeleton;
+     private _originalComputeTransformMatrices;
+diff --git a/node_modules/babylon-mmd/esm/Runtime/mmdModel.js b/node_modules/babylon-mmd/esm/Runtime/mmdModel.js
+index 58aa64f..db9d9a5 100644
+--- a/node_modules/babylon-mmd/esm/Runtime/mmdModel.js
++++ b/node_modules/babylon-mmd/esm/Runtime/mmdModel.js
+@@ -55,6 +55,19 @@ export class MmdModel {
+      * You can get the final transform matrix of a bone by `MmdModel.runtimeBones[i].getFinalMatrixToRef()`
+      */
+     runtimeBones;
++    /**
++     * The array of per-bone custom scale factors (length = bones * 3, default 1.0)
++     *
++     * Stored as [sx, sy, sz] triplets for each bone index
++     */
++    boneScales;
++    /**
++     * Whether to propagate bone scale to child bones
++     *
++     * When true (default), setting a bone scale will also set the same scale
++     * to all descendant bones recursively
++     */
++    propagateScaleToChildren = true;
+     /**
+      * The morph controller of this model
+      *
+@@ -64,6 +77,26 @@ export class MmdModel {
+     _physicsModel;
+     _logger;
+     _sortedRuntimeBones;
++    /**
++     * Bones that need append transform re-evaluation after physics stage
++     *
++     * These bones are processed in beforePhysics (transformAfterPhysics=false),
++     * but their append transform target is a physics-driven bone.
++     * After physics updates their target's world matrix, the append transform
++     * must be re-computed to reflect the physics-driven bone's new position.
++     */
++    _appendPhysicsBones;
++    /**
++     * Whether to re-evaluate post-physics append transforms for physics-driven targets
++     *
++     * These bones are processed in beforePhysics (transformAfterPhysics=false), but their
++     * append transform target is a physics-driven bone. After physics updates the target's
++     * world matrix, the append transform must be re-computed to follow physics.
++     *
++     * When disabled, such bones keep their pre-physics append values (pre-fix behavior).
++     * Can be toggled at runtime; the guard is evaluated per-frame in afterPhysics().
++     */
++    enablePostPhysicsAppendTransform = false;
+     /**
+      * Observable triggered when the animation duration is changed
+      *
+@@ -98,6 +131,7 @@ export class MmdModel {
+         this.mesh = mmdSkinnedMesh;
+         this.skeleton = skeleton;
+         const worldTransformMatrices = this.worldTransformMatrices = new Float32Array(skeleton.bones.length * 16);
++        this.boneScales = new Float32Array(skeleton.bones.length * 3).fill(1.0);
+         {
+             let ikSolverCount = 0;
+             const bonesMetadata = mmdMetadata.bones;
+@@ -109,13 +143,13 @@ export class MmdModel {
+         }
+         // If you are not using MMD Runtime, you need to update the world matrix once. it could be waste of performance
+         skeleton.prepare();
+-        this._disableSkeletonWorldMatrixUpdate(skeleton);
+         const runtimeBones = this.runtimeBones = this._buildRuntimeSkeleton(skeleton.bones, mmdMetadata.bones, mmdMetadata.rigidBodies, worldTransformMatrices, physicsParams !== null);
+         const sortedBones = this._sortedRuntimeBones = [...runtimeBones];
+         // sort must be stable (require ES2019)
+         sortedBones.sort((a, b) => {
+             return a.transformOrder - b.transformOrder;
+         });
++        this._disableSkeletonWorldMatrixUpdate(skeleton);
+         const morphTargetManagers = [];
+         {
+             const meshes = mmdMetadata.meshes;
+@@ -299,10 +333,105 @@ export class MmdModel {
+         const physicsModel = this._physicsModel;
+         if (physicsModel !== null) {
+             physicsModel.syncBones();
++            // Decompose the pure physics world rotation of each grant target into its
++            // LOCAL rotation (relative to its parent's world matrix at sync time) before
++            // _update(true) may overwrite the world matrices.
++            //
++            // The post-physics append solver must grant the target's LOCAL physics
++            // rotation (mirroring the reference GrantSolver which grants
++            // parentBone.quaternion, a local quaternion). Granting the world rotation
++            // would inject the model root rotation into the bone's local rotation,
++            // doubling the model rotation the bone already inherits via the parent chain.
++            if (this.enablePostPhysicsAppendTransform) {
++                const bones = this._appendPhysicsBones;
++                for (let i = 0; i < bones.length; ++i) {
++                    const targetBone = bones[i].appendTransformSolver.targetBone;
++                    const worldRotation = MmdModel._TempQuaternion;
++                    Quaternion.FromRotationMatrixToRef(
++                        targetBone.getWorldMatrixToRef(MmdModel._TempMatrix),
++                        worldRotation
++                    );
++                    if (targetBone.parentBone !== null) {
++                        // local = world * inverse(parentWorld)
++                        const parentWorldRotation = MmdModel._TempQuaternion2;
++                        Quaternion.FromRotationMatrixToRef(
++                            targetBone.parentBone.getWorldMatrixToRef(MmdModel._TempMatrix2),
++                            parentWorldRotation
++                        );
++                        Quaternion.InverseToRef(parentWorldRotation, parentWorldRotation);
++                        worldRotation.multiplyToRef(parentWorldRotation, targetBone._savedPhysicsRotation);
++                    }
++                    else {
++                        targetBone._savedPhysicsRotation.copyFrom(worldRotation);
++                    }
++                }
++            }
+         }
+         this._update(true);
++        // Post-physics append transform: re-evaluate append transforms whose target
++        // bone is driven by physics. This mirrors the reference implementation's
++        // grantSolver.updatePhysics() behavior.
++        if (physicsModel !== null && this.enablePostPhysicsAppendTransform) {
++            this._updateAppendPhysicsBones();
++        }
+         this.mesh.metadata.skeleton._markAsDirty();
+     }
++    /**
++     * Set a per-axis scale factor for a bone. The scale is applied around the bone's
++     * animated world pivot and affects vertices influenced by this bone.
++     *
++     * When `propagateScaleToChildren` is true (default), the scale is also applied
++     * to all descendant bones recursively.
++     *
++     * @param boneNameOrIndex Bone name or runtime bone index
++     * @param sx X-axis scale factor
++     * @param sy Y-axis scale factor
++     * @param sz Z-axis scale factor
++     */
++    setBoneScale(boneNameOrIndex, sx, sy, sz) {
++        const index = typeof boneNameOrIndex === "number"
++            ? boneNameOrIndex
++            : this.runtimeBones.findIndex(b => b.name === boneNameOrIndex);
++        if (index === -1 || index >= this.runtimeBones.length)
++            return;
++        this._setBoneScaleInternal(index, sx, sy, sz, this.propagateScaleToChildren);
++    }
++    _setBoneScaleInternal(index, sx, sy, sz, propagate) {
++        const base = index * 3;
++        this.boneScales[base] = sx;
++        this.boneScales[base + 1] = sy;
++        this.boneScales[base + 2] = sz;
++        if (propagate) {
++            const bone = this.runtimeBones[index];
++            const childBones = bone.childBones;
++            for (let i = 0; i < childBones.length; ++i) {
++                const childBone = childBones[i];
++                const childIndex = this.runtimeBones.indexOf(childBone);
++                if (childIndex !== -1) {
++                    this._setBoneScaleInternal(childIndex, sx, sy, sz, true);
++                }
++            }
++        }
++    }
++    /**
++     * Get the current per-axis scale factor for a bone
++     *
++     * @param boneNameOrIndex Bone name or runtime bone index
++     * @returns {x, y, z} scale factors, or null if bone not found
++     */
++    getBoneScale(boneNameOrIndex) {
++        const index = typeof boneNameOrIndex === "number"
++            ? boneNameOrIndex
++            : this.runtimeBones.findIndex(b => b.name === boneNameOrIndex);
++        if (index === -1 || index >= this.runtimeBones.length)
++            return null;
++        const base = index * 3;
++        return {
++            x: this.boneScales[base],
++            y: this.boneScales[base + 1],
++            z: this.boneScales[base + 2]
++        };
++    }
+     _update(afterPhysicsStage) {
+         const usePhysics = this._physicsModel !== null && !this._physicsModel.needDeoptimize;
+         const sortedBones = this._sortedRuntimeBones;
+@@ -314,6 +443,37 @@ export class MmdModel {
+             );
+         }
+     }
++    /**
++     * Re-evaluate append transforms for bones whose target is a physics-driven bone
++     *
++     * After physics simulation, the target bone's world matrix has been updated by physics.
++     * Bones that reference such targets need their append transform re-computed
++     * and their world matrix rebuilt (along with their descendants).
++     * @internal
++     */
++    _updateAppendPhysicsBones() {
++        const bones = this._appendPhysicsBones;
++        if (bones.length === 0) return;
++        const tempRotation = MmdRuntimeBone._TempRotation;
++        const tempPosition = MmdRuntimeBone._TempPosition;
++        for (let i = 0; i < bones.length; ++i) {
++            const bone = bones[i];
++            const solver = bone.appendTransformSolver;
++            // Re-read the bone's own animated rotation/position (before append)
++            const rotation = bone.getAnimatedRotationToRef(tempRotation);
++            const position = bone.getAnimationPositionOffsetToRef(tempPosition);
++            // Re-run append transform — target bone's world matrix is now physics-updated
++            solver.update(rotation, position, true);
++            if (solver.affectRotation) {
++                rotation.copyFrom(solver.appendRotation);
++            }
++            if (solver.affectPosition) {
++                position.copyFrom(solver.appendPosition);
++            }
++            // Rebuild world matrix with the corrected rotation/position and propagate to children
++            bone._rebuildWorldMatrixAfterPhysics(rotation, position);
++        }
++    }
+     _buildRuntimeSkeleton(bones, bonesMetadata, rigidBodiesMetadata, worldTransformMatrices, buildRigidBodyIndices) {
+         const boneToRigidBodiesIndexMap = new Array(bonesMetadata.length);
+         for (let i = 0; i < boneToRigidBodiesIndexMap.length; ++i)
+@@ -395,6 +555,18 @@ export class MmdModel {
+                 }
+             }
+         }
++        // Build the list of bones that need post-physics append transform re-evaluation.
++        // These are bones processed in beforePhysics (transformAfterPhysics=false) whose
++        // append transform target bone has physics rigid bodies.
++        this._appendPhysicsBones = [];
++        for (let i = 0; i < runtimeBones.length; ++i) {
++            const bone = runtimeBones[i];
++            if (bone.appendTransformSolver !== null
++                && bone.appendTransformSolver.targetBoneHasPhysics
++                && !bone.transformAfterPhysics) {
++                this._appendPhysicsBones.push(bone);
++            }
++        }
+         return runtimeBones;
+     }
+     _originalComputeTransformMatrices = null;
+@@ -403,14 +575,109 @@ export class MmdModel {
+             return;
+         this._originalComputeTransformMatrices = skeleton._computeTransformMatrices;
+         const worldTransformMatrices = this.worldTransformMatrices;
++        const boneScales = this.boneScales;
++        const sortedBones = this._sortedRuntimeBones;
++        const boneCount = sortedBones.length;
++
++        const parentIndices = new Int32Array(boneCount);
++        for (let i = 0; i < boneCount; i++) {
++            const p = sortedBones[i].parentBone;
++            parentIndices[i] = p ? p.boneIndex : -1;
++        }
++
++        const scaledPivots = new Float32Array(boneCount * 3);
++        const tempWorld = new Matrix();
++
+         skeleton._computeTransformMatrices = function (targetMatrix, _initialSkinMatrix) {
+             this.onBeforeComputeObservable.notifyObservers(this);
++
++            // Pass 1: compute scaled bone world pivots via topological traversal.
++            // sortedBones is ordered by transformOrder (parents before children).
++            for (let si = 0; si < boneCount; si++) {
++                const bi = sortedBones[si].boneIndex;
++                const wOffset = bi * 16;
++                const origPx = worldTransformMatrices[wOffset + 12];
++                const origPy = worldTransformMatrices[wOffset + 13];
++                const origPz = worldTransformMatrices[wOffset + 14];
++
++                const pi = parentIndices[si];
++                if (pi >= 0) {
++                    const pWOffset = pi * 16;
++                    const pOrigPx = worldTransformMatrices[pWOffset + 12];
++                    const pOrigPy = worldTransformMatrices[pWOffset + 13];
++                    const pOrigPz = worldTransformMatrices[pWOffset + 14];
++                    const pScaledPx = scaledPivots[pi * 3];
++                    const pScaledPy = scaledPivots[pi * 3 + 1];
++                    const pScaledPz = scaledPivots[pi * 3 + 2];
++                    const pSx = boneScales[pi * 3];
++                    const pSy = boneScales[pi * 3 + 1];
++                    const pSz = boneScales[pi * 3 + 2];
++
++                    const dx = origPx - pOrigPx;
++                    const dy = origPy - pOrigPy;
++                    const dz = origPz - pOrigPz;
++
++                    // Transform world-space offset to parent-local,
++                    // scale there, then transform back to world.
++                    // Parent's 3×3 linear part (columns 0,1,2):
++                    const r00 = worldTransformMatrices[pWOffset + 0];
++                    const r10 = worldTransformMatrices[pWOffset + 1];
++                    const r20 = worldTransformMatrices[pWOffset + 2];
++                    const r01 = worldTransformMatrices[pWOffset + 4];
++                    const r11 = worldTransformMatrices[pWOffset + 5];
++                    const r21 = worldTransformMatrices[pWOffset + 6];
++                    const r02 = worldTransformMatrices[pWOffset + 8];
++                    const r12 = worldTransformMatrices[pWOffset + 9];
++                    const r22 = worldTransformMatrices[pWOffset + 10];
++
++                    // R^T * offset → parent-local
++                    const lx = r00 * dx + r10 * dy + r20 * dz;
++                    const ly = r01 * dx + r11 * dy + r21 * dz;
++                    const lz = r02 * dx + r12 * dy + r22 * dz;
++
++                    // Scale in parent-local
++                    const slx = lx * pSx;
++                    const sly = ly * pSy;
++                    const slz = lz * pSz;
++
++                    // R * scaled → back to world
++                    scaledPivots[bi * 3]     = pScaledPx + r00 * slx + r01 * sly + r02 * slz;
++                    scaledPivots[bi * 3 + 1] = pScaledPy + r10 * slx + r11 * sly + r12 * slz;
++                    scaledPivots[bi * 3 + 2] = pScaledPz + r20 * slx + r21 * sly + r22 * slz;
++                } else {
++                    scaledPivots[bi * 3]     = origPx;
++                    scaledPivots[bi * 3 + 1] = origPy;
++                    scaledPivots[bi * 3 + 2] = origPz;
++                }
++            }
++
++            // Pass 2: compute final skin matrices
+             for (let index = 0; index < this.bones.length; index++) {
+                 const bone = this.bones[index];
+                 bone._childUpdateId += 1;
+                 if (bone._index !== -1) {
+                     const mappedIndex = bone._index === null ? index : bone._index;
+-                    bone.getAbsoluteInverseBindMatrix().multiplyToArray(Matrix.FromArrayToRef(worldTransformMatrices, index * 16, bone.getFinalMatrix()), targetMatrix, mappedIndex * 16);
++                    const sx = boneScales[index * 3];
++                    const sy = boneScales[index * 3 + 1];
++                    const sz = boneScales[index * 3 + 2];
++                    if (sx !== 1.0 || sy !== 1.0 || sz !== 1.0) {
++                        const wOffset = index * 16;
++                        const m = tempWorld.m;
++                        for (let i = 0; i < 16; i++) m[i] = worldTransformMatrices[wOffset + i];
++
++                        m[12] = scaledPivots[index * 3];
++                        m[13] = scaledPivots[index * 3 + 1];
++                        m[14] = scaledPivots[index * 3 + 2];
++
++                        m[0] *= sx;  m[1] *= sx;  m[2] *= sx;
++                        m[4] *= sy;  m[5] *= sy;  m[6] *= sy;
++                        m[8] *= sz;  m[9] *= sz;  m[10] *= sz;
++
++                        bone.getAbsoluteInverseBindMatrix().multiplyToArray(tempWorld, targetMatrix, mappedIndex * 16);
++                    }
++                    else {
++                        bone.getAbsoluteInverseBindMatrix().multiplyToArray(Matrix.FromArrayToRef(worldTransformMatrices, index * 16, bone.getFinalMatrix()), targetMatrix, mappedIndex * 16);
++                    }
+                 }
+             }
+             this._identity.copyToArray(targetMatrix, this.bones.length * 16);
+@@ -434,4 +701,8 @@ export class MmdModel {
+         }
+         this.mesh.metadata.skeleton._markAsDirty();
+     }
++    static _TempMatrix = Matrix.Identity();
++    static _TempMatrix2 = Matrix.Identity();
++    static _TempQuaternion = Quaternion.Identity();
++    static _TempQuaternion2 = Quaternion.Identity();
+ }
+diff --git a/node_modules/babylon-mmd/esm/Runtime/mmdRuntimeBone.d.ts b/node_modules/babylon-mmd/esm/Runtime/mmdRuntimeBone.d.ts
+index fec8b09..7cb57b8 100644
+--- a/node_modules/babylon-mmd/esm/Runtime/mmdRuntimeBone.d.ts
++++ b/node_modules/babylon-mmd/esm/Runtime/mmdRuntimeBone.d.ts
+@@ -90,6 +90,10 @@ export declare class MmdRuntimeBone implements IMmdRuntimeBone {
+      * Slice of `MmdModel.worldTransformMatrices` that corresponds to this bone
+      */
+     readonly worldMatrix: Float32Array;
++    /**
++     * Index of this bone in the MmdModel's worldTransformMatrices and boneScales arrays
++     */
++    readonly boneIndex: number;
+     /**
+      * Gets the rotation of a local transform with animations and bone morphs applied
+      */
+diff --git a/node_modules/babylon-mmd/esm/Runtime/mmdRuntimeBone.js b/node_modules/babylon-mmd/esm/Runtime/mmdRuntimeBone.js
+index 850e1c0..6b32ce5 100644
+--- a/node_modules/babylon-mmd/esm/Runtime/mmdRuntimeBone.js
++++ b/node_modules/babylon-mmd/esm/Runtime/mmdRuntimeBone.js
+@@ -45,6 +45,12 @@ export class MmdRuntimeBone {
+      * If the bone does not have an append transform solver, it will be null
+      */
+     appendTransformSolver;
++    /**
++     * Saved world rotation from physics sync, used to undo beforePhysics append
++     * when computing post-physics append transforms.
++     * @internal
++     */
++    _savedPhysicsRotation;
+     /**
+      * Axis limitation of the bone
+      */
+@@ -85,7 +91,10 @@ export class MmdRuntimeBone {
+      * Slice of `MmdModel.worldTransformMatrices` that corresponds to this bone
+      */
+     worldMatrix;
+-    // /**
++    /**
++     * Index of this bone in the MmdModel's worldTransformMatrices and boneScales arrays
++     */
++    boneIndex;
+     //  * Gets the position of a local transform with animations and bone morphs applied
+     //  */
+     // public getAnimatedPositionToRef: (target: Vector3) => Vector3;
+@@ -113,10 +122,12 @@ export class MmdRuntimeBone {
+         this.name = boneMetadata.name;
+         this.parentBone = null;
+         this.childBones = [];
++        this.boneIndex = boneIndex;
+         this.transformOrder = boneMetadata.transformOrder;
+         this.flag = boneMetadata.flag;
+         this.transformAfterPhysics = (boneMetadata.flag & PmxObject.Bone.Flag.TransformAfterPhysics) !== 0;
+         this.appendTransformSolver = null;
++        this._savedPhysicsRotation = Quaternion.Identity();
+         if (boneMetadata.axisLimit !== undefined) {
+             this.axisLimit = Vector3.FromArray(boneMetadata.axisLimit).normalize();
+         }
+@@ -358,6 +369,38 @@ export class MmdRuntimeBone {
+             }
+         }
+     }
++    /**
++     * Rebuild world matrix after physics stage using already-computed rotation and position
++     *
++     * Used for post-physics append transform: the bone's append solver has been re-run
++     * with the physics-updated target bone, and the resulting rotation/position are passed in.
++     * Child bones are recursively updated to propagate the change.
++     * @param rotation final rotation after append transform (may alias _TempRotation)
++     * @param position final position offset after append transform (may alias _TempPosition)
++     * @internal
++     */
++    _rebuildWorldMatrixAfterPhysics(rotation, position) {
++        const worldMatrix = MmdRuntimeBone._TempMatrix;
++        const localPosition = this.linkedBone.getRestMatrix().getTranslationToRef(MmdRuntimeBone._TempPosition2)
++            .addInPlace(position);
++        const scaling = this.linkedBone.scaling;
++        if (scaling.x !== 1 || scaling.y !== 1 || scaling.z !== 1) {
++            Matrix.ComposeToRef(scaling, rotation, localPosition, worldMatrix);
++        }
++        else {
++            Matrix.FromQuaternionToRef(rotation, worldMatrix);
++            worldMatrix.setTranslation(localPosition);
++        }
++        if (this.parentBone !== null) {
++            const parentWorldMatrix = this.parentBone.getWorldMatrixToRef(MmdRuntimeBone._TempMatrix2);
++            worldMatrix.multiplyToRef(parentWorldMatrix, worldMatrix);
++        }
++        worldMatrix.copyToArray(this.worldMatrix);
++        const childBones = this.childBones;
++        for (let i = 0; i < childBones.length; ++i) {
++            childBones[i]._updateWorldMatrixRecursive();
++        }
++    }
+     /**
+      * Get the world matrix of this bone
+      *

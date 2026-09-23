@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">MikuPlay Reburn</string>
+    <string name="title_activity_main">MikuPlay Reburn</string>
+    <string name="package_name">com.akusera.mikuplayreburn</string>
+    <string name="custom_url_scheme">com.akusera.mikuplayrebunr</string>
+
+    <!-- 安全区手动调整窗口 -->
+    <string name="safe_area_tuner_title">显示区域校准</string>
+    <string name="safe_area_tuner_hint">如果应用内容被状态栏或导航栏遮挡，可拖动滑块调整顶部/底部安全区高度，实时生效。\n\n『左侧边栏』和底部『杂项』可以重新校准。\n\n后续再出现问题且以上两处都点不到时，删除『内部存储/MikuPlay/安全区设置.txt』并重启应用</string>
+    <string name="safe_area_tuner_top">顶部留白高度</string>
+    <string name="safe_area_tuner_bottom">底部留白高度</string>
+    <string name="safe_area_tuner_ok">确定</string>
+</resources>

@@ -1,0 +1,8 @@
+{
+  "appId": "com.akusera.mikuplayreburn",
+  "appName": "MikuPlay Reburn",
+  "webDir": "dist",
+  "server": {
+    "allowNavigation": ["localhost", "127.0.0.1"]
+  }
+}

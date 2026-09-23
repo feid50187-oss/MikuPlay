@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "es2020",
+    "lib": ["es2020", "dom"],
+    "moduleResolution": "bundler",
+    "strict": true,
+    "jsx": "react",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "types": ["vite/client", "./src/types/glsl.d.ts"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}

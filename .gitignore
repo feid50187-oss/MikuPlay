@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Logs
+*.log
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Test coverage / Vite local overrides
+coverage/
+*.local
+
+# IDE / OS
+.idea/
+.vs/
+.DS_Store
+Thumbs.db
+
+# AI tools
+.trae/
+.claude/
+CLAUDE.md
+.reasonix/
+.qoder/
+.workbuddy/
+
+# Crash logs / local-only files
+acra_*.txt
+scale.patch
+
+# Project artifacts (generated / local only)
+src/public/testPlugins/
+/plugins/
+resource-hash.json
+qrcode.jpg
+docs/
+reference/
+
+# Reverse-engineering scratch files
+scripts/__pycache__/
+scripts/generate_skin_lut.py
+/scripts/

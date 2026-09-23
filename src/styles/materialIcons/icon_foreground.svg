@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <g transform="translate(64, 70)">
+    <!-- 坐标轴 -->
+    <line x1="0" y1="0" x2="55.426" y2="32" stroke="#ff6c6cff" stroke-width="4" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="0" y2="-60" stroke="#33ff33ff" stroke-width="4" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="-55.426" y2="32" stroke="#0088ffff" stroke-width="4" stroke-linecap="round"/>
+    <!-- 立方体三个可视面填充 -->
+    <!-- 顶面 (上方) -->
+    <polygon points="0,-48 41.569,-24 0,0 -41.569,-24" fill="#7be5ffff" fill-opacity="0.9"/>
+    <!-- 右面 (右侧) -->
+    <polygon points="41.569,-24 0,0 0,48 41.569,24" fill="#4cf1caff" fill-opacity="0.9"/>
+    <!-- 左面 (左侧) -->
+    <polygon points="-41.569,-24 0,0 0,48 -41.569,24" fill="#ffb1d7ff" fill-opacity="0.9"/>
+    <!-- 立方体边线 (边长48, 线宽4, 不绘制与坐标轴重合的3条边) -->
+    <!-- 平行于X轴的边 -->
+    <line x1="0" y1="-48" x2="41.569" y2="-24" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <line x1="-41.569" y1="24" x2="0" y2="48" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <line x1="-41.569" y1="-24" x2="0" y2="0" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <!-- 平行于Y轴的边 -->
+    <line x1="41.569" y1="24" x2="41.569" y2="-24" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <line x1="-41.569" y1="24" x2="-41.569" y2="-24" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <line x1="0" y1="48" x2="0" y2="0" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <!-- 平行于Z轴的边 -->
+    <line x1="41.569" y1="24" x2="0" y2="48" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <line x1="0" y1="-48" x2="-41.569" y2="-24" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <line x1="41.569" y1="-24" x2="0" y2="0" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round"/>
+    <!-- 外边缘辅助线 (虚线, 延伸到画布边缘) -->
+    <g stroke="#c1c1c1ff" stroke-width="0.8" stroke-dasharray="3,1">
+      <!-- Edge1 B→D ∥X -->
+      <line x1="-34.105" y1="-70" x2="64" y2="-13.360"/>
+      <line x1="-42.105" y1="-70" x2="64" y2="-8.741"/>
+      <!-- Edge2 D→A ∥Y -->
+      <line x1="43.569" y1="-70" x2="43.569" y2="58"/>
+      <line x1="39.569" y1="-70" x2="39.569" y2="58"/>
+      <!-- Edge3 A→E ∥Z -->
+      <line x1="-13.321" y1="58" x2="64" y2="13.360"/>
+      <line x1="-21.321" y1="58" x2="64" y2="8.741"/>
+      <!-- Edge4 E→C ∥X -->
+      <line x1="-64" y1="13.360" x2="13.319" y2="58"/>
+      <line x1="-64" y1="8.741" x2="21.319" y2="58"/>
+      <!-- Edge5 C→F ∥Y -->
+      <line x1="-43.569" y1="-70" x2="-43.569" y2="58"/>
+      <line x1="-39.569" y1="-70" x2="-39.569" y2="58"/>
+      <!-- Edge6 F→B ∥Z -->
+      <line x1="-64" y1="-13.360" x2="34.111" y2="-70"/>
+      <line x1="-64" y1="-8.741" x2="42.111" y2="-70"/>
+    </g>
+  </g>
+</svg>

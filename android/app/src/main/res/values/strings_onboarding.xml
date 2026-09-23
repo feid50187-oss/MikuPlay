@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 按钮文字 -->
+    <string name="onboarding_previous">上一步</string>
+    <string name="onboarding_next">下一步</string>
+    <string name="onboarding_finish">完成</string>
+    <string name="onboarding_cooldown">%d秒后可继续</string>
+    <string name="onboarding_skip">跳过</string>
+
+    <!-- 步骤 1：欢迎 -->
+    <string name="onboarding_title_step1">欢迎使用 MikuPlay</string>
+    <string name="onboarding_desc_step1">接下来是新手指引，建议仔细阅读</string>
+
+    <!-- 步骤 2：基础概念 -->
+    <string name="onboarding_title_step2">常见问题</string>
+
+    <!-- 步骤 3：UI介绍 -->
+    <string name="onboarding_title_step3">界面介绍</string>
+    <string name="onboarding_desc_step3">熟悉主界面各区域功能，快速上手操作</string>
+
+    <!-- 步骤 4：基本使用 -->
+    <string name="onboarding_title_step4">基本使用</string>
+    <string name="onboarding_desc_step4">了解常用操作流程，轻松玩转模型</string>
+
+    <!-- 基础概念 QA 文本 -->
+    <string name="onboarding_qa2_q">1.从哪里获取MMD模型？</string>
+    <string name="onboarding_qa2_a"><![CDATA[<font color="#000000"><b>「模之屋」</b></font>：国内最主流的MMD模型配布网站，注册后即可下载，资源丰富且下载便捷。<br><font color="#000000"><b>「BowlRoll」</font></b>：日本的主流MMD资源平台，包含模型、动作、场景、特效等各类资源。\n下载时请注意遵守各模型的使用规约。]]></string>
+
+    <string name="onboarding_qa3_q">2.下载的模型如何使用？</string>
+    <string name="onboarding_qa3_a"><![CDATA[下载的模型通常是一个压缩包，需要将其<b><font color="#000000">完整解压</font></b>，不能只提取pmx/pmd文件。\n\n部分模型使用手机自带的文件管理解压可能会乱码(文件名出现意义不明的汉字、黑方块，文档无法阅读)，建议使用<font color="#000000"><b>专业的解压工具</b></font>。]]></string>
+
+    <string name="onboarding_qa4_q">3.解压模型后相压模型后相册多了一堆奇奇怪怪的图片，这是什么？能删掉吗？</string>
+    <string name="onboarding_qa4_a"><![CDATA[这些图片是模型的纹理，<b><font color="#D32F2F">绝对！绝对！绝对！不能删除！</font></b>如果不想看到它们，可以在模型文件夹创建一个.nomedia文件，系统就会忽略这些图片。]]></string>
+
+    <string name="onboarding_qa5_q">4.场景怎么导入？</string>
+    <string name="onboarding_qa5_a"><![CDATA[本软件支持</b>PMX格式</b>的场景，导入方式与导入人物相同]]></string>
+
+    <string name="onboarding_qa6_q">5.我下载的模型是.blend 格式，可以使用吗？</string>
+    <string name="onboarding_qa6_a"><![CDATA[<b>.blend</b>是Blender的工程文件格式，只能在Blender中打开和编辑，本软件<b><font color="#D32F2F">不支持</font></b>这种格式。]]></string>
+
+##    <!-- 步骤 5：使用技巧 -->
+    <string name="onboarding_title_step5">使用技巧</string>
+
+    <!-- 技巧条目 -->
+    <string name="onboarding_tip1_title">调整视角</string>
+    <string name="onboarding_tip1_body"><![CDATA[双指<b>拖拽</b>旋转视角，双指<b>缩放</b>调整远近，单指<b>滑动</b>平移画面。]]></string>
+
+    <string name="onboarding_tip2_title">动作异常</string>
+    <string name="onboarding_tip2_body"><![CDATA[腿脚悬空，双腿动作异常等则可能与<b>IK</b>有关，软件自动识别结果不一定准确。请打开<b>"模型"</b>操作面板，点击模型名称右侧<b>IK 开关</b>切换 IK 状态。]]></string>
+
+    <string name="onboarding_tip3_title">物理引擎</string>
+    <string name="onboarding_tip3_body"><![CDATA[软件提供两种不同的物理引擎，如果发现物理异常(如:物体撕裂、坠落、胸部塌落等)请点击左上角<b>菜单</b>按钮打开侧边栏，切换物理引擎。<font color="#FF0000">注意：切换引擎会清空场景</font>]]></string>
+
+    <string name="onboarding_tip4_title">胸部物理</string>
+    <string name="onboarding_tip4_body"><![CDATA[部分模型依赖<b>"物理后付与"</b>特性，如果发现胸部缺失物理效果，可在<b>模型</b>操作面板打开该特性。]]></string>
+
+    <string name="onboarding_tip5_title">渲染输出</string>
+    <string name="onboarding_tip5_body"><![CDATA[软件提供3种输出方式，推荐使用<b>"离线渲染"</b>——这是软件特色功能，无论预览有多卡，<font color="#4CAF50">渲染结果都绝对流畅</font>。]]></string>
+
+    <string name="onboarding_tip6_title">透明背景</string>
+    <string name="onboarding_tip6_body"><![CDATA[在<b>"环境" → "背景"</b>中选择<b>"透明背景"</b>即可启用。推荐使用<b>"帧输出"</b>模式搭配渲染设置中的<b>"透明背景"</b>使用。<font color="#FF0000">Android 几乎完全不支持透明背景的视频，不推荐在离线渲染打开"透明背景"开关</font>。]]></string>
+
+    <!-- 无障碍 -->
+    <string name="onboarding_app_icon">应用图标</string>
+    <string name="onboarding_step_image">指引步骤插图</string>
+</resources>

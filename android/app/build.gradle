@@ -1,0 +1,158 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+android.buildFeatures.buildConfig = true
+// 从 package.json 读取版本号，保持前端与 Android 构建版本同步
+def packageJson = new groovy.json.JsonSlurper().parse(file('../../package.json'))
+def versionFromPkg = packageJson.version as String
+def versionCodeFromPkg = versionFromPkg.replaceAll(/[^0-9]/, '') as int
+
+android {
+    namespace = "com.akusera.mikuplayreburn"
+    compileSdk = rootProject.ext.compileSdkVersion
+    defaultConfig {
+        applicationId "com.akusera.mikuplayreburn"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode 140
+        versionName "1.4-Test"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        // 编译时注入 QQ 加群 key
+        buildConfigField "String", "QQ_GROUP_KEY", "\"${project.findProperty('qqGroupKey') ?: ''}\""
+
+        // 是否为 pdev 变体（插件开发者版），release/debug 默认为 false，pdev buildType 覆盖为 true
+        buildConfigField "boolean", "PDEV", "false"
+
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
+        externalNativeBuild {
+            cmake {
+                // CMakeLists.txt 已统管优化级别与符号隐藏，此处仅保留标准与 ABI
+                cppFlags "-std=c++17"
+                abiFilters 'arm64-v8a'
+            }
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.22.1+"
+        }
+    }
+
+    // 排除 Kotlin 调试文件和其他不应出现在发布包中的元数据
+    packaging {
+        resources {
+            excludes += [
+                '**/DebugProbesKt.bin',
+                'META-INF/*.kotlin_module',
+                // auto-service 编译期注册文件，运行时无用，排除避免 R8 警告
+                'META-INF/services/javax.annotation.processing.Processor',
+            ]
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            debuggable false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        // pdev 变体：插件开发者版。独立 applicationId + 原生悬浮刷新按钮。
+        // 构建时需先以 VITE_BUILD_TARGET=pdev 构建前端 dist。
+        // 关闭 R8/资源收缩：pdev 是调试用途，保留可读堆栈；前端 JS 混淆由 vite 侧完成。
+        pdev {
+            applicationIdSuffix ".pdev"
+            minifyEnabled true
+            shrinkResources true
+            debuggable false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            buildConfigField "boolean", "PDEV", "true"
+            // 独立应用名：与正式版在桌面上区分（resValue 覆盖 strings.xml 的 app_name）
+            resValue "string", "app_name", "Plugin Dev"
+            // 依赖库（capacitor / compose 等）只发布 debug/release 变体，pdev 消费时回退到 release
+            matchingFallbacks = ['release']
+        }
+    }
+
+    // ABI Split：按 CPU 架构分包，缩小 APK 体积
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'arm64-v8a'
+            universalApk false
+        }
+    }
+
+    buildFeatures {
+        compose true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
+    }
+
+    kotlinOptions {
+        jvmTarget = '21'
+    }
+
+    kotlin {
+        jvmToolchain(21)
+    }
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+    // ACRA — Java 崩溃/异常自动捕获，写入本地文件
+    implementation("ch.acra:acra-core:5.13.1")
+    compileOnly "com.google.auto.service:auto-service-annotations:1.1.1"
+    annotationProcessor "com.google.auto.service:auto-service:1.1.1"
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
+    //implementation("io.github.jamaismagic.ffmpeg:ffmpeg-kit-main-min-16kb:6.1.4")
+
+    // Jetpack Compose
+    implementation platform("androidx.compose:compose-bom:2024.09.02")
+    implementation "androidx.compose.ui:ui"
+    implementation "androidx.compose.ui:ui-graphics"
+    implementation "androidx.compose.ui:ui-tooling-preview"
+    implementation "androidx.compose.animation:animation"
+    implementation "androidx.compose.material3:material3"
+    implementation "androidx.activity:activity-compose:$androidxActivityVersion"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7"
+    implementation "androidx.lifecycle:lifecycle-runtime-compose:2.8.7"
+    debugImplementation "androidx.compose.ui:ui-tooling"
+
+    //implementation("org.nanohttpd:nanohttpd:2.3.1")
+}
+
+apply from: 'capacitor.build.gradle'
+
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch(Exception e) {
+    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
+}

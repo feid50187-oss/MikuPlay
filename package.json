@@ -1,0 +1,42 @@
+{
+  "name": "mikuplay-reburn",
+  "version": "1.4.0",
+  "description": "基于Babylon.js的MMD 3D场景编辑与渲染播放器，支持模型加载、动画播放、粒子系统、后处理特效、屏幕录制和离线渲染",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:pdev": "vite build --mode pdev",
+    "build:android": "vite build && cd android && gradlew assembleRelease",
+    "build:pdev:android": "npm run build:pdev && cd android && gradlew assemblePdev",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "postinstall": "patch-package"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "proprietary",
+  "type": "module",
+  "dependencies": {
+    "@babylonjs/core": "^9.2.0",
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/app": "^8.1.0",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
+    "@capacitor/filesystem": "^8.1.2",
+    "@capacitor/status-bar": "^8.0.2",
+    "babylon-mmd": "1.2.0",
+    "eruda": "^3.4.3",
+    "jszip": "^3.10.2"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "patch-package": "^8.0.1",
+    "terser": "^5.46.2",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.8",
+    "vite-plugin-obfuscator": "^1.0.5",
+    "vitest": "^4.1.7"
+  }
+}
